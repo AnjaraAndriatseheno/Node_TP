@@ -17,6 +17,14 @@ const __dirname = path.dirname(__filename);
 const server = http.createServer(app);
 const io = new Server(server)
 
+io.on('connection', (socket) => {
+    console.log('Utilisateur connecté:', socket.id);
+  
+    socket.on('message', (msg) => {
+      console.log('Message reçu:', msg);
+    });
+});
+
 app.get("*", (req, res) => {
     res.sendFile(path.join(__dirname, "index.html"));
 });
