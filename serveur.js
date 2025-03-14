@@ -30,7 +30,7 @@ app.get("*", (req, res) => {
 });
 
 
-app.listen(9000, () =>{
+app.listen({port}, () =>{
     console.log(`Serveur en écoute sur le port ${port}`)
 })
 
