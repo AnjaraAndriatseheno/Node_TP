@@ -1,19 +1,47 @@
-import express from 'express';
-import dotenv from 'dotenv';
+import express from 'express'
+import http from 'http'
+import dotenv from 'dotenv'
+import connectDB from './src/db/db.js'
+import router from './src/routes/logsRoutes.js'
+import { Server as SocketIO } from 'socket.io'
 
-import routerLogs from './src/routes/logsRoutes.js';
+dotenv.config()
 
-dotenv.config();
+const app = express()
 
-const app = express();
+const server = http.createServer(app)
 
-const port = process.env.port
+const io = new SocketIO(server)
 
-app.use(routerLogs);
-app.get('/accueil', (req, res) => res.send("Bienvenue !"))
-app.get('/*', (req, res) => res.status(404).send("Page Introuvable"))
+connectDB()
 
+app.use(express.json())
 
-app.listen(port, () => 
-    console.log(`Le serveur est en écoute sur le serveur ${port}`)
-)
+app.use(router)
+
+io.on('connection', (socket) => {
+  console.log('Un utilisateur est connecté')
+
+  // Lorsqu'un message est envoyé depuis le frontend
+  socket.on('message', async (msgData) => {
+    try {
+      const message = new Message(msgData)
+      await message.save()
+
+      // Émettre le message à tous les utilisateurs connectés
+      io.emit('message', msgData)
+    } catch (error) {
+      console.log('Erreur lors de l\'enregistrement du message', error)
+    }
+  })
+
+  // Lorsqu'un utilisateur se déconnecte
+  socket.on('disconnect', () => {
+    console.log('Un utilisateur s\'est déconnecté')
+  })
+})
+
+const port = process.env.PORT 
+server.listen(port, () => {
+  console.log(`Le serveur écoute sur le port ${port}`)
+})

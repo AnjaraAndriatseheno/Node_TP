@@ -1,15 +1,15 @@
 
-
+import Message from '../models/message.js'
 
 
 export const getLogs = async (req, res) => {
-    const logsLists = await Logs.find();
+    const logsLists = await Message.find();
     res.send(logsLists);
 }
 
 export const deleteLogs = async (req, res) => {
     try{
-        const delLogs = await Logs.findByIdAndDelete(req.params.id);
+        const delLogs = await Message.findByIdAndDelete(req.params.id);
         if(!delLogs){
             return res.status(404).json({message: "Logs non trouvé"})
         }
